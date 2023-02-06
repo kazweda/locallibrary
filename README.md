@@ -1,0 +1,2 @@
+# locallibrary
+Django tutorial
