@@ -1,8 +1,9 @@
 from django.conf.urls import include
 from django.urls import path
+from . import views
 
-urlpatterns += [
-    path('catalog/', include('catalog.urls')),
+urlpatterns = [
+    path('', views.index, name='index'),
 ]
 
 from django.views.generic import RedirectView
