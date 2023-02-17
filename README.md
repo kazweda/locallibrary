@@ -13,6 +13,4 @@ graph TD
 ```
 
 ## Source code
-[mdn
-/
-django-locallibrary-tutorial](https://github.com/mdn/django-locallibrary-tutorial)
+[mdn/django-locallibrary-tutorial](https://github.com/mdn/django-locallibrary-tutorial)
