@@ -11,3 +11,8 @@ graph TD
     C -->| | E[HTTP Response\n HTML]
     F[Template\n file.html] -->| | C
 ```
+
+## Source code
+[mdn
+/
+django-locallibrary-tutorial](https://github.com/mdn/django-locallibrary-tutorial)
