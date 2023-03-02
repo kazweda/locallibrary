@@ -149,3 +149,79 @@ from django.shortcuts import get_object_or_404
 ```
 です。
 
+続いて `/catalog/tests/test_views.py` に以下の内容を追加。
+```
+class RenewBookInstancesViewTest(TestCase):
+    def setUp(self):
+        test_user1 = User.objects.create_user(...)
+        test_user2 = User.objects.create_user(...)
+        test_user1.save()
+        test_user2.save()
+
+        permission = Permission.objects.get(name='Set book as returned')
+        test_user2.user_permissions.add(permission)
+        test_user2.save()
+        
+        # Create a book（省略）
+        # Create genre
+        # Create a BookInstance object for test_user1
+        # Create a BookInstance object for test_user２
+```
+続いてテストコード。
+```
+def test_redirect_if_not_logged_in(self):
+    （ログインしていない場合）
+    self.assertEqual(response.status_code, 302)
+    
+def test_forbidden_if_logged_in_but_not_correct_permission(self):
+    （更新権限を持たない場合）
+    self.assertEqual(response.status_code, 403)
+
+def test_logged_in_with_permission_borrowed_book(self):
+    （更新権限を持つ場合、自分が借りた本）
+    self.assertEqual(response.status_code, 200)
+
+def test_logged_in_with_permission_another_users_borrowed_book(self):
+    （更新権限を持つ場合、他のユーザーが借りた本）
+    self.assertEqual(response.status_code, 200)
+
+def test_HTTP404_for_invalid_book_if_logged_in(self):
+    （本のUIDが存在しない場合）
+    self.assertEqual(response.status_code, 404)
+
+def test_uses_correct_template(self):
+    （正しいテンプレートが適用されている）
+    self.assertEqual(response.status_code, 200)
+    self.assertTemplateUsed(
+        response, 'catalog/book_renew_librarian.html')
+
+def test_form_renewal_date_initially_has_date_three_weeks_in_future(self):
+    （更新予定日が既定の3週間先の日付になっている）
+    self.assertEqual(response.status_code, 200)
+    ...
+    self.assertEqual(
+        response.context['form'].initial['renewal_date'], 
+        date_3_weeks_in_future)
+
+def test_redirects_to_all_borrowed_book_list_on_success(self):
+    （日付の更新が完了すると借りている本の一覧にリダイレクトされること）
+    self.assertRedirects(response, reverse('all-borrowed'))
+
+def test_form_invalid_renewal_date_past(self):
+    （更新日に過去の日付を指定するとフォームエラーが返ること）
+    self.assertEqual(response.status_code, 200)
+    self.assertFormError(
+        response, 
+        'form', 
+        'renewal_date', 
+        'Invalid date - renewal in past')
+
+def test_form_invalid_renewal_date_future(self):
+    （更新日に既定よりも先の日付を指定するとフォームエラーが返ること）
+    self.assertEqual(response.status_code, 200)
+    self.assertFormError(
+        response, 
+        'form', 
+        'renewal_date', 
+        'Invalid date - renewal more than 4 weeks ahead')
+```
