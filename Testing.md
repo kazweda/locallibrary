@@ -113,3 +113,33 @@ def test_logged_in_uses_correct_template(self):
     self.assertEqual(response.status_code, 200)
     self.assertTemplateUsed(response, 'catalog/bookinstance_list_borrowed_user.html')
 ```
+
+# Testing view with forms
+フォームと組み合わせてビューをテスト
+
+```
+from catalog.forms import RenewBookForm
+
+@permission_required('catalog.can_mark_returned')
+def renew_book_librarian(request, pk):
+    book_instance = get_object_or_404(BookInstance, pk=pk)
+
+    if request.method == 'POST':
+        book_renewal_form = RenewBookForm(request.POST)
+        if form.is_valid():
+            book_instance.due_back = form.cleaned_data['renewal_date']
+            book_instance.save()
+            return HttpResponseRedirect(reverse('all-borrowed'))
+
+    # If this is a GET (or any other method) create the default form
+    else:
+        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        book_renewal_form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
+
+    context = {
+        'book_renewal_form': book_renewal_form,
+        'book_instance': book_instance,
+    }
+
+    return render(request, 'catalog/book_renew_librarian.html', context)
+```
